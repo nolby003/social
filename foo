@@ -330,8 +330,7 @@ def update_profile(profile_list):
             profile.set_status(update)
             print("\nUpdated status for " + fullName + ":")
             get_profile(profile)
-        else:
-            print("\n" + email + " is not found in profiles.\n")
+            
         
         if subchoice == "add_friend":
             friendEmail = input("\nPlease enter email address of friend to add: ")
@@ -342,10 +341,7 @@ def update_profile(profile_list):
                 if emailToAdd is True:
                     print("\nAdded", friendFirstName, "updated profile is:")
                     get_profile(profile)
-                else:
-                    print("\n" + friendFirstName + " is already a friend.\n")
-            else:
-                print("\n" + friendEmail + " is not found in profiles.\n")
+
         
         if subchoice == "remove_friend":
             friendEmail = input("\nPlease enter email address of friend to remove: ")
@@ -357,8 +353,8 @@ def update_profile(profile_list):
                         get_profile(profile)
                     else:
                         print("\n" + friendEmail + " is not " + firstName + "'s friend.\n")
-            else:
-                 print("\n" + friendEmail + " is not found in profiles.\n")                        
+    else:
+         print("\n" + friendEmail + " is not found in profiles.\n")                        
     
 ### run through program at start ###
 
