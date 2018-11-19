@@ -1,0 +1,384 @@
+#
+# File: nolby003_social.py
+# Author: Benjamin Nolan
+# Student ID: 110272505
+# Email ID: nolby003
+# Date: 19/11/2018
+# Desc: PSP Assignment 3 (Part B) - Provided file (social.py).
+# This is my own work as defined by the University's Academic Misconduct policy.
+#
+
+#import modules
+import profile
+import list_function
+
+### Start of pre-defined functions ###
+
+# Function read_file() - read file, then create objects from each profile and set as profile_list
+def read_file(filename, profile_list):
+
+    # open file containing profiles
+    with open(filename, mode="r") as infile: 
+        # set counter
+        index = 0
+    
+        # loop through file, begin at first line
+        for line in infile: 
+                    
+            # split first line for first name, family name, email and gender
+            get_word = line.split()
+        
+            # get first object being first name
+            fname = get_word[0]
+            # for debugging purposes    
+            #print(get_word[0])        
+        
+            # get second object being last name
+            lname = get_word[1]
+            # for debugging purposes
+            #print(get_word[1])
+        
+            # get third object being email
+            email = get_word[2]
+            # for debugging purposes
+            #print(get_word[2])
+        
+            # get fourth object being gender
+            gender = get_word[3]
+            # for debugging purposes
+            #print(get_word[3])
+            
+            # get next line for status
+            line = infile.readline()
+            
+            # strip line break after status
+            status = line.strip('\n')
+            # for debugging purposes
+            #print(status)
+
+            # create new array (using profile class) containing all objects that were set to the variables we needed
+            new_profile = profile.Profile(fname,lname,email,gender,status)
+            
+            # build profile list from just created array
+            #profile_list = list_function.insert_value(profile_list, new_profile, index)
+            profile_list.append(new_profile)
+            
+            # get next line for number of friends
+            line = infile.readline()
+            # for debugging purposes - count of line
+            #print(line)
+            
+            # if line is greater than zero, for each friends in range between zero and the total friends, read each line -
+            # friends email addresses
+            if int(line) > 0:
+
+                for friends in range(0,int(line)):
+
+                    line = infile.readline()
+
+                    friend = line.strip('\n')
+
+                    # use profile class and definition add_friend to list any existant friends
+                    #profile_list.add_friend(friend)
+
+            #increment    
+            index+=1    
+
+    infile.close
+    return profile_list   
+    
+# Function display_summary() - user choice summary, displays all profile information we collected from read_file
+def display_summary(profile_list):
+    
+    print('==============================================================================')
+    print('Profile Summary')
+    print('==============================================================================')
+    for profiles in profile_list:    
+        print('------------------------------------------------------------------------------')
+        #get_profiles(profiles)
+        # print majority of profile data
+        print(profiles.get_given_name() + " ", end ="")
+        print(profiles.get_family_name(), end ="")
+        print(" (" + profiles.get_gender(), end ="")
+        print(" | " + profiles.get_email() + ")\n", end ="")
+        print("- " + profiles.get_status())
+
+        # friends inclusive here          
+        if int(profiles.get_number_friends()) > 0:
+            print("- Friends (" + str(profiles.get_number_friends()) + "):")
+            for thisFriend in profiles.get_friends_list():
+                fullName = get_full_name(profile_list, thisFriend)
+                print("    " + fullName)
+        
+        # no friends :/ print here
+        else:
+            print("- No friends yet...")    
+        print("---------------------------------------------------------------------------")
+        print("===========================================================================")
+    
+    return profile_list
+
+# Function write_to_file() - write to file new_profiles.txt each time we quit the program
+def write_to_file(filename, profile_list):
+
+    with open('new_profiles.txt', 'w') as outfile:
+        for profile in profile_list:
+            outfile.write(str(profile))
+
+    # close the file
+    outfile.close()
+    return profile_list   
+        
+# Function find_profile() - search profile list via email as the keyword    
+def find_profile(profile_list, email):
+    
+    # use list function find to search profile list for email as value
+    found = list_function.find(profile_list, email)
+       
+    return found        
+      
+# Function add_profile() - add profile to profile list
+def add_profile(profile_list):
+
+    # ask user for email to enter  
+    email = input('\nPlease enter email address: ')
+    
+    check = find_profile(profile_list, email)
+
+    if check == -1:
+        fname = input('Please enter given name: ')
+        lname = input('Please enter family name: ')
+        gender = input('Please enter gender: ')
+        status = input('Please enter current status: ')
+        string = ('\n' + fname + ' ' + lname + ' ' + email + ' ' + gender + '\n' + status + '\n0')        
+        file = open(filename,'a')
+        file.write(string)
+        file.close()        
+        print('Successfully added',email,'to profiles.')
+        ask_menu_choice(profile_list)
+    else:
+        print('\n',email,'already exists in profiles.')
+    
+    return profile_list
+
+# Function remove_profile() - remove profile from profiles
+def remove_profile(profile_list):
+    
+    # ask user for email to enter 
+    email = input("\nPlease enter email address: ")
+    found = find_profile(profile_list, email)
+
+    # if the email address does exist then delete it from profiles
+    if found > -1:
+        for profile in profile_list:
+            # is a friend in this profile?
+            test = profile.is_friend(email)
+            # if a friend exists
+            if test == True:
+                profile.remove_friend(email) 
+        profile_list = list_function.remove_value(profile_list, found)
+
+        # list function remove value to remove profile
+        print("\nSuccessfully removed", email, "from profiles.\n")
+    else:
+        print("\n" + email + " is not found in profiles.\n")
+    return profile_list
+
+### End of pre-defined functions ###
+ 
+
+### Start of user-defined functions ###
+
+# main user menu
+def ask_menu_choice(profile_list):
+
+    
+    # set choices
+    choices = ['summary','add','remove','search','update','quit']
+    
+    # ask user for choice
+    choice = input('\nPlease enter choice [summary|add|remove|search|update|quit]: ')
+    # if choice not in choices list
+    while choice not in choices:
+        # advise not correct
+        print('\nNot a valid command - please try again.\n')
+        # ask again
+        choice = str(input('\nPlease enter choice [summary|add|remove|search|update|quit]: '))
+    
+    # check choice and run functions based on choice
+    while choice in choices:
+        if choice == 'summary':
+            display_summary(profile_list) 
+        elif choice == 'add':
+            profile_list = add_profile(profile_list)
+        elif choice == 'remove':
+            profile_list = remove_profile(profile_list)
+        elif choice == 'search':
+            search_profiles(profile_list) 
+        elif choice == 'update':
+            update_profile(profile_list)
+        elif choice == 'quit':
+            write_to_file("new_profiles.txt", profile_list) 
+            print("\n\n-- Program terminating --\n")
+
+        ask_menu_choice(profile_list)
+    return choice
+# update user menu
+def ask_menu_choice2(email):
+
+    subchoices = ['status','add_friend','remove_friend']
+    fullname = get_full_name(profile_list, email)
+
+    # declare a variable to hold the string to print input request
+    string = "\n\nUpdate " + fullname + " "
+    string += "[status|add_friend|remove_friend]: "
+
+    # get user choice
+    subchoice = input(string)
+
+    # test if user choice is in the list of valid choices and
+    # if not tell the user that you are going back to the main menu
+    if subchoice not in subchoices:
+        print("\nNot a valid command - returning to main menu.\n")
+
+    return subchoice
+
+# display student details
+def display_details():
+
+    print('File: nolby003_social.py')
+    print('Author: Benjamin Nolan')
+    print('Student ID: 110272505')
+    print('Email ID: nolby003')
+    print('This is my own work as defined by the University\'s Academic Misconduct policy.')
+ 
+    return
+# search profile
+def search_profiles(profile_list):
+    
+    email = input("\nPlease enter email address: ")
+
+    found = find_profile(profile_list, email)
+
+    if found > -1:
+        profile = profile_list[found]
+        print("\n")
+        get_profile(profile)
+    else:
+        print("\n" + email + " is not found in profiles.\n")
+
+    return    
+            
+def get_profile(profile):
+    print(profile.get_given_name() + " ", end ="")
+    print(profile.get_family_name(), end ="")
+    print(" (" + profile.get_gender(), end ="")
+    print(" | " + profile.get_email() + ")\n", end ="")
+    print("- " + profile.get_status())
+
+    # friends inclusive here          
+    if int(profile.get_number_friends()) > 0:
+        print("- Friends (" + str(profile.get_number_friends()) + "):")
+        for thisFriend in profile.get_friends_list():
+            fullName = get_full_name(profile_list, thisFriend)
+            print("    " + fullName)
+    
+    # no friends :/ print here
+    else:
+        print("- No friends yet...") 
+
+    return       
+
+def get_name(profile_list, email):
+    # get index postion according to email
+    index = find_profile(profile_list, email)
+
+    # get the firstname of the single profile
+    details = profile_list[index]
+
+    # get the first name and make the first character a capital
+    firstName = details.get_given_name().title() 
+
+    return firstName
+
+def get_full_name(profile_list, email):
+    # get index postion according to email
+    index = find_profile(profile_list, email)
+
+    # get the details of the profile according to the email passed as ARGS
+    details = profile_list[index]
+
+    # concatenate given and family name 
+    fullName = details.get_given_name() + " " + details.get_family_name()
+
+    # capitalise the first character of both parts of the name
+    fullName = fullName.title()
+
+    return fullName
+
+def update_profile(profile_list):
+    email = input("\nPlease enter email address to update: ")
+    found = find_profile(profile_list, email)
+    if found > -1:
+        subchoice = ask_menu_choice2(email)
+        profile = profile_list[found]
+        firstName = get_name(profile_list, email).title()
+        fullName = get_full_name(profile_list, email).title()  
+        
+        if subchoice == "status":
+            update = input("\nPlease enter status update: ")
+            profile.set_status(update)
+            print("\nUpdated status for " + fullName + ":")
+            get_profile(profile)
+        else:
+            print("\n" + email + " is not found in profiles.\n")
+        
+        if subchoice == "add_friend":
+            friendEmail = input("\nPlease enter email address of friend to add: ")
+            test = find_profile(profile_list, friendEmail)
+            friendFirstName = get_name(profile_list, friendEmail)
+            if test > -1:
+                emailToAdd = profile.add_friend(friendEmail)
+                if emailToAdd is True:
+                    print("\nAdded", friendFirstName, "updated profile is:")
+                    get_profile(profile)
+                else:
+                    print("\n" + friendFirstName + " is already a friend.\n")
+            else:
+                print("\n" + friendEmail + " is not found in profiles.\n")
+        
+        if subchoice == "remove_friend":
+            friendEmail = input("\nPlease enter email address of friend to remove: ")
+            test = find_profile(profile_list, friendEmail)
+            if test > -1:
+                    emailToRemove = profile.remove_friend(friendEmail)                    
+                    if emailToRemove is True:
+                        print("\nRemoved", friendEmail, "updated profile is:")
+                        get_profile(profile)
+                    else:
+                        print("\n" + friendEmail + " is not " + firstName + "'s friend.\n")
+            else:
+                 print("\n" + friendEmail + " is not found in profiles.\n")                        
+    
+### run through program at start ###
+
+### Start of program ###
+
+# declare variables and empty lists etc
+# declare profile list as empty
+profile_list = [] 
+# set file variable used throughout program
+filename = 'profiles.txt'
+
+# init obtain profiles
+profile_list = read_file(filename, profile_list)
+
+# start with display student details and output to screen
+display_details()
+
+# user menu input choice
+
+
+# followed by user input of choice options
+choice = ask_menu_choice(profile_list)
+
